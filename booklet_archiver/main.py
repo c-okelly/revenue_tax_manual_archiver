@@ -9,6 +9,9 @@ def main():
 
     # TODO Give rought comparison of PDF documents
 
+def getTwoLatestFiles(searchDirectory):
+
+    pass
 
 if __name__ == "__main__":
     main()

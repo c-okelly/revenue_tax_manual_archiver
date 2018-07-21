@@ -1,14 +1,15 @@
 from bs4 import BeautifulSoup
 import requests
-import os
+import os, datetime
 
 # Download single section of Tax Duty manuals
 def downloadRevenuePDFSForSingleManualSection():
 
     baseUrl = "https://www.revenue.ie"
-    # TODO Remove hardcode page
     manualSection = "/en/tax-professionals/tdm/income-tax-capital-gains-tax-corporation-tax/index.aspx" 
     url = baseUrl + manualSection
+    timeStamp = datetime.datetime.now().isoformat()
+    saveDirectory = "pdf/" + timeStamp + "/"
 
     # Get page
     page = getSoupPage(url)
@@ -19,20 +20,51 @@ def downloadRevenuePDFSForSingleManualSection():
     # aSections = {}
     # aSections[0] = allSections[1]
     # aSections[1] = allSections[2]
+    # allSections = aSections
 
     for subSectionKey in allSections.keys():
         addDocumentsToSection(allSections[subSectionKey])
 
-    print(allSections)
-
     for key in allSections.keys():
-        downloadSectionPdfs(allSections[key])
+        downloadSectionPdfs(allSections[key], saveDirectory)
 
-def downloadSectionPdfs(section):
+def donwloadRenenuePDFSizes():
+
+    baseUrl = "https://www.revenue.ie"
+    manualSection = "/en/tax-professionals/tdm/income-tax-capital-gains-tax-corporation-tax/index.aspx" 
+    url = baseUrl + manualSection
+    timeStamp = datetime.datetime.now().isoformat()
+    saveDirectory = "pdf/" + timeStamp + "/"
+
+    # Get page
+    page = getSoupPage(url)
+
+    allSections = getSections(page)
+
+    # # TODO Remove - Used to shroten section for testing
+    # aSections = {}
+    # aSections[0] = allSections[1]
+    # aSections[1] = allSections[2]
+    # allSections = aSections
+
+    for subSectionKey in allSections.keys():
+        addDocumentsToSection(allSections[subSectionKey])
+
+    #TODO
+    for key in allSections.keys():
+        pass
+
+#TODO
+def getPDFdataSize():
+
+    pass
+
+def downloadSectionPdfs(section, saveDirectory="pdf/"):
 
     baseUrl = "https://www.revenue.ie"
     sectionName = section["title"] + "=>" + section["name"]
-    saveDirectory = "pdf/" + sectionName
+    saveDirectory += sectionName
+
     documents = section["documents"]
 
     for docKey in documents.keys():

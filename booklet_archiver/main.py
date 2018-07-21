@@ -1,17 +1,14 @@
 
 from pdfScraper import downloadRevenuePDFSForSingleManualSection
+from CompareFiles import compareOldestTwoFilesTrees
 
 def main():
 
-    # Download for single section
-    # TODO Should be able to specify new / old trees of pdfs
+    defaultSaveDir = "pdf/"
     downloadRevenuePDFSForSingleManualSection()
 
     # TODO Give rought comparison of PDF documents
-
-def getTwoLatestFiles(searchDirectory):
-
-    pass
+    compareOldestTwoFilesTrees(defaultSaveDir)
 
 if __name__ == "__main__":
     main()

@@ -1,14 +1,21 @@
 import os, hashlib, datetime
 
-def main():
+def compareOldestTwoFilesTrees(saveDirectory):
 
-    print("Start of main")
+    files = [f for f in os.listdir(saveDirectory) if f[0] != "."]
+    
+    if len(files) <= 1:
+        print("Only one file tree was found. Cannot run comparison.")
+        return
 
-    oldFilesDir = ""
-    newFilesDir = ""
+    files.sort()
+    newFilesDir = saveDirectory + files[-1]
+    oldFilesDir = saveDirectory + files[-2]
 
-    oldFiles = getAllFiles("pdf_1")
-    newFiles = getAllFiles("pdf_2")
+
+    # print(files, oldFilesDir, newFilesDir)
+    oldFiles = getAllFiles(oldFilesDir)
+    newFiles = getAllFiles(newFilesDir)
 
     results = compareAllFiles(oldFiles, newFiles)
 
@@ -21,6 +28,8 @@ def writeResultToTextFile(logFile, results):
         f.write("\n")
         for line in results:
             f.write(line+"\n")
+        if len(results) == 0:
+            f.write("No changes were found.\n")
         f.write("The log section was written at: " + str(time) + ".\n")
 
 def getAllFiles(directory):
@@ -33,24 +42,26 @@ def getAllFiles(directory):
 
     return filePaths
 
+def getShortDirName(path, dirSeperator="/", fileDepth = 2):
+    return dirSeperator.join(path.split(dirSeperator)[fileDepth:])
+
+def buildFileNameToFilePathDict(files, fileDepth=2):
+    # Remove top file name from path for comparison
+    data = {}
+    for path in files:
+        shortPath = getShortDirName(path, fileDepth=2)
+        data[shortPath] = path
+    return data
+
 def compareAllFiles(oldFiles, newFiles):
     
     changedFilesLog = []
 
-    dirSeperator = "/"
-    # Remove top file name from path for comparison
-    oldDict = {}
-    for path in oldFiles:
-        shortPath = dirSeperator.join(path.split(dirSeperator)[1:])
-        oldDict[shortPath] = path
-
-    newDict = {}
-    for path in newFiles:
-        shortPath = dirSeperator.join(path.split(dirSeperator)[1:])
-        newDict[shortPath] = path
+    oldDict = buildFileNameToFilePathDict(oldFiles)
+    newDict = buildFileNameToFilePathDict(newFiles)
 
     for filePath in newFiles:
-        shortPathName = dirSeperator.join(filePath.split(dirSeperator)[1:])
+        shortPathName = getShortDirName(filePath)
         # Check if file exists and compare hash
         # print(filePath)
         # print(shortPathName)
@@ -69,12 +80,12 @@ def compareAllFiles(oldFiles, newFiles):
     
     # Check if file has been removed
     for filePath in oldFiles:
-        shortPath = dirSeperator.join(filePath.split(dirSeperator)[1:])
+        shortPath = getShortDirName(filePath)
         if newDict.get(shortPath) == None:
             messege = "File located at %s, is no longer present in the new download." % filePath
             changedFilesLog.append(messege)
 
-    print(changedFilesLog)
+    # print(changedFilesLog)
     return changedFilesLog
 
 def getFileHash(filePath):

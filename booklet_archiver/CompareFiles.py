@@ -3,6 +3,7 @@ from difflib import SequenceMatcher
 
 def compareOldestTwoFilesTrees(saveDirectory):
 
+    logFileName = "log.txt"
     files = [f for f in os.listdir(saveDirectory) if f[0] != "."]
     
     if len(files) <= 1:
@@ -20,7 +21,9 @@ def compareOldestTwoFilesTrees(saveDirectory):
 
     results = compareAllFiles(oldFiles, newFiles)
 
-    writeResultToTextFile("log.txt", results)
+    print("There have been " + str(len(results)) + " files chagned.")
+    writeResultToTextFile(logFileName, results)
+    print("Logs have been written to " + logFileName)
 
 def writeResultToTextFile(logFile, results):
 
@@ -55,7 +58,8 @@ def buildFileNameToFilePathDict(files, fileDepth=2):
     return data
 
 def compareAllFiles(oldFiles, newFiles):
-    
+
+    minFileDiff = 0.0001
     changedFilesLog = []
 
     oldDict = buildFileNameToFilePathDict(oldFiles)
@@ -77,8 +81,9 @@ def compareAllFiles(oldFiles, newFiles):
                 text2 = open(oldFildPath,"rb").read()
                 m = SequenceMatcher(None, text1, text2)
                 diffRatio = 1 - m.quick_ratio()
-                messege = "File located at %s, is present but has a different hash to the previous match. Ratio of diff is %s" % (filePath, str(diffRatio))
-                changedFilesLog.append(messege)
+                if diffRatio > minFileDiff:
+                    messege = "File located at %s, is present but has a different hash to the previous match. Ratio of diff is %s" % (filePath, str(diffRatio))
+                    changedFilesLog.append(messege)
         else:
             messege = "File located at %s, is not present in the old files set." % filePath
             changedFilesLog.append(messege)

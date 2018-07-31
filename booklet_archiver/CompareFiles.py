@@ -1,4 +1,5 @@
 import os, hashlib, datetime
+from difflib import SequenceMatcher
 
 def compareOldestTwoFilesTrees(saveDirectory):
 
@@ -68,10 +69,15 @@ def compareAllFiles(oldFiles, newFiles):
 
         if oldDict.get(shortPathName) != None:
             # Compare hash of files
-            if getFileHash(filePath) == getFileHash(oldDict.get(shortPathName)):
+            oldFildPath = oldDict.get(shortPathName)
+            if getFileHash(filePath) == getFileHash(oldFildPath):
                 pass
             else:
-                messege = "File located at %s, is present but has a different hash to the previous match." % filePath
+                text1 = open(filePath,"rb").read()
+                text2 = open(oldFildPath,"rb").read()
+                m = SequenceMatcher(None, text1, text2)
+                diffRatio = 1 - m.quick_ratio()
+                messege = "File located at %s, is present but has a different hash to the previous match. Ratio of diff is %s" % (filePath, str(diffRatio))
                 changedFilesLog.append(messege)
         else:
             messege = "File located at %s, is not present in the old files set." % filePath
